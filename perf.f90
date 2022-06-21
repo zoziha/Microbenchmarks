@@ -94,7 +94,7 @@ REAL(dp)  :: fn_val
 
 REAL(dp)            :: u, sum
 REAL(dp), SAVE      :: v, sln
-LOGICAL, SAVE   :: second = .FALSE.
+LOGICAL, SAVE       :: second = .FALSE.
 REAL(dp), PARAMETER :: one = 1, vsmall = TINY( one )
 
 IF (second) THEN
@@ -110,12 +110,12 @@ ELSE
   DO
     CALL RANDOM_NUMBER( u )
     CALL RANDOM_NUMBER( v )
-    u = SCALE( u, 1 ) - one
-    v = SCALE( v, 1 ) - one
+    u = 2*u - one
+    v = 2*v - one
     sum = u*u + v*v + vsmall         ! vsmall added to prevent LOG(zero) / zero
     IF(sum < one) EXIT
   END DO
-  sln = SQRT(- SCALE( LOG(sum), 1 ) / sum)
+  sln = SQRT(- 2*LOG(sum) / sum)
   fn_val = u*sln
 END IF
 
@@ -220,7 +220,7 @@ end function
 subroutine printfd(n)
 integer, intent(in) :: n
 integer :: i , unit
-open(unit=1, file="/dev/null")
+open(unit=1, file="null")
 do i = 1, n
     write(unit=1, fmt=*) i, i+1
 end do
