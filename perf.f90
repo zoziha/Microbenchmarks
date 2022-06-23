@@ -79,7 +79,7 @@ seed = clock + 37 * [ (i - 1, i = 1, n) ]
 call random_seed(put=seed)
 end subroutine
 
-FUNCTION rnorm() RESULT( fn_val )
+impure elemental subroutine randn(fn_val)
 
 !   This subroutine was taken from: http://jblevins.org/mirror/amiller/rnorm.f90
 
@@ -87,50 +87,38 @@ FUNCTION rnorm() RESULT( fn_val )
 !   Reference: Marsaglia,G. & Bray,T.A. 'A convenient method for generating
 !              normal variables', Siam Rev., vol.6, 260-264, 1964.
 
-IMPLICIT NONE
-REAL(dp)  :: fn_val
+    real(dp), intent(out) :: fn_val
 
-! Local variables
+    ! Local variables
 
-REAL(dp)            :: u, sum
-REAL(dp), SAVE      :: v, sln
-LOGICAL, SAVE   :: second = .FALSE.
-REAL(dp), PARAMETER :: one = 1, vsmall = TINY( one )
+    real(dp)            :: u, sum
+    real(dp), save      :: v, sln
+    logical, save       :: second = .false.
+    real(dp), parameter :: one = 1, vsmall = tiny(one)
 
-IF (second) THEN
-! If second, use the second random number generated on last call
+    if (second) then
+    ! If second, use the second random number generated on last call
 
-  second = .false.
-  fn_val = v*sln
+        second = .false.
+        fn_val = v*sln
 
-ELSE
-! First call; generate a pair of random normals
+    else
+    ! First call; generate a pair of random normals
 
-  second = .true.
-  DO
-    CALL RANDOM_NUMBER( u )
-    CALL RANDOM_NUMBER( v )
-    u = SCALE( u, 1 ) - one
-    v = SCALE( v, 1 ) - one
-    sum = u*u + v*v + vsmall         ! vsmall added to prevent LOG(zero) / zero
-    IF(sum < one) EXIT
-  END DO
-  sln = SQRT(- SCALE( LOG(sum), 1 ) / sum)
-  fn_val = u*sln
-END IF
+        second = .true.
+        do
+            call random_number(u)
+            call random_number(v)
+            u = 2*u - one
+            v = 2*v - one
+            sum = u*u + v*v + vsmall         ! vsmall added to prevent LOG(zero) / zero
+            if (sum < one) exit
+        end do
+        sln = sqrt(-2*log(sum)/sum)
+        fn_val = u*sln
+    end if
 
-RETURN
-END FUNCTION rnorm
-
-subroutine randn(A)
-real(dp), intent(out) :: A(:, :)
-integer :: i, j
-do j = 1, size(A, 2)
-    do i = 1, size(A, 1)
-        A(i, j) = rnorm()
-    end do
-end do
-end subroutine
+end subroutine randn
 
 ! Convert a number of clock ticks, as returned by system_clock called
 ! with integer(i64) arguments, to milliseconds
